@@ -1,8 +1,8 @@
-local lib = require "lib"
 -- todo :
 -- manualy add sprites
 -- limit action (draw,click,..) to the map
 -- save sprites in a file (load them next time)
+local lib = require "lib"
 local mapSize = 20
 local tileWidth = 64
 local tileHeight = 32
