@@ -1,5 +1,4 @@
 local lib = require "lib"
-
 -- todo :
 -- manualy add sprites
 -- limit action (draw,click,..) to the map
