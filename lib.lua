@@ -8,14 +8,14 @@ local function point_in_polygon(vertices, point)
 
 	for k, vert in pairs(vertices) do
 		if
-		(
-            (
-                (vert.y > point.y) ~= (prev.y > point.y)
-            ) and
-            (
-                point.x < (prev.x - vert.x) * (point.y - vert.y) / (prev.y - vert.y) + vert.x
-            )
-        )
+			(
+				(
+					(vert.y > point.y) ~= (prev.y > point.y)
+				) and
+				(
+					point.x < (prev.x - vert.x) * (point.y - vert.y) / (prev.y - vert.y) + vert.x
+				)
+      )
 		then
 			contains = not contains
 		end
