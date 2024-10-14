@@ -1,8 +1,14 @@
 -- todo :
---  FIX :loading tiles from a file
-require "save"
+-- loading tile set (.PNG) from table to UI element; tileSet = { layer_name={ list_of_pngs } }
+-- Select tiles (.PNG) from UI to create a map
+-- add camera with zoom on cursor
+-- handling physics objects
+-- othognal mini-map (maybe!)
 
+local ffi = require "ffi"
 local lib = require "lib"
+local save = require "save"
+
 local mapSize = 20
 local tileWidth = 32
 local tileHeight = 16
@@ -10,12 +16,17 @@ local tiles = {}
 local savedTiles = {}
 local sx,sy = love.graphics.getPixelDimensions()
 
-if love.filesystem.getInfo("tiles.lua") then
-  local load = love.filesystem.load("tiles.lua")
-  load()
-end
+ffi.cdef([[
+    typedef struct FILE FILE;
+    FILE* fopen(const char *filename, const char *mode);
+    int fprintf(FILE* stream, const char* format, ...);
+    int fclose(FILE* stream);
+]])
 
-print(#savedTiles)
+if love.filesystem.getInfo("tiles.lua") then
+  local contents=love.filesystem.load("tiles.lua")
+  savedTiles = contents()
+end
 
 local function tile(x,y,width,height,offsetX,offsetY)
   offsetX = offsetX or 10
@@ -26,7 +37,7 @@ local function tile(x,y,width,height,offsetX,offsetY)
     ty=y,
     hovered=false,
     drawable=true,
-    image = love.graphics.newImage('tileImage.png')
+    image = love.graphics.newImage('tile044.png')
   }
 
   function t.x()
@@ -46,27 +57,14 @@ local function tile(x,y,width,height,offsetX,offsetY)
     return t.image:getHeight()/imageOffset
   end
 
-  function t:draw()
+  function t:drawIso()
     -- turn the x and y points to a diamond shape
     local tx,ty = self.x(), self.y() - height/2
     local bx,by = self.x(), self.y() + height/2
     local lx,ly = self.x() - width/2 , self.y()
     local rx,ry = self.x() + width/2 , self.y()
 
-    if self.drawable then
-      if self.hovered then
-        self.drawable = false
-      else
-        love.graphics.polygon(
-          "line",
-          lx,ly,
-          tx,ty,
-          rx,ry,
-          bx,by
-        )
-      end
-    else
-      love.graphics.draw(self.image,self.x(),self.y()-self.imageOffset(),nil,nil,nil,width/2,height/2)
+    if self.hovered then
       table.insert(savedTiles,{
         image="tile044.png",
         x=self.x(),
@@ -74,8 +72,16 @@ local function tile(x,y,width,height,offsetX,offsetY)
         ox=width/2,
         oy=height/2
       })
+      self.hovered = false
+    else
+      love.graphics.polygon(
+        "line",
+        lx,ly,
+        tx,ty,
+        rx,ry,
+        bx,by
+      )
     end
-
   end
 
   function t:checkClick(mx,my)
@@ -112,7 +118,10 @@ end
 
 love.keypressed = function (key)
   if key == 'escape' then
-    love.filesystem.write("tiles.lua",table.show(savedTiles,"savedMap"))
+    local file = ffi.C.fopen(love.filesystem.getWorkingDirectory(), "w")
+    ffi.C.fprintf(file, save(savedTiles))
+    ffi.C.fclose(file)
+
     love.event.quit('restart')
   end
 end
@@ -121,10 +130,14 @@ love.draw = function ()
   love.graphics.clear()
   for _, tile in pairs(tiles) do
     love.graphics.setColor(1,1,1)
-    tile:draw()
+    tile:drawIso()
 
     love.graphics.setColor(1,0,0)
     love.graphics.points(tile.x(), tile.y())
+  end
+
+  for _, t in pairs(savedTiles) do
+    love.graphics.draw(love.graphics.newImage(t.image),t.x,t.y,nil,nil,nil,t.ox,t.oy)
   end
 end
 
