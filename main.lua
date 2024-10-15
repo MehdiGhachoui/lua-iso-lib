@@ -1,6 +1,6 @@
 -- todo :
--- loading tile set (.PNG) from table to UI element; tileSet = { layer_name={ list_of_pngs } }
--- Select tiles (.PNG) from UI to create a map
+-- draw layers onscreen
+-- Select tiles  to create a map
 -- add camera with zoom on cursor
 -- handling physics objects
 -- othognal mini-map (maybe!)
@@ -8,7 +8,7 @@
 local ffi = require "ffi"
 local lib = require "lib"
 local save = require "save"
-
+local tileSet = require "tileSet"
 local mapSize = 20
 local tileWidth = 32
 local tileHeight = 16
@@ -27,6 +27,9 @@ if love.filesystem.getInfo("tiles.lua") then
   local contents=love.filesystem.load("tiles.lua")
   savedTiles = contents()
 end
+
+print(#tileSet)
+
 
 local function tile(x,y,width,height,offsetX,offsetY)
   offsetX = offsetX or 10
@@ -118,7 +121,7 @@ end
 
 love.keypressed = function (key)
   if key == 'escape' then
-    local file = ffi.C.fopen(love.filesystem.getWorkingDirectory(), "w")
+    local file = ffi.C.fopen(love.filesystem.getWorkingDirectory().."/tiles.lua", "w")
     ffi.C.fprintf(file, save(savedTiles))
     ffi.C.fclose(file)
 
@@ -128,6 +131,12 @@ end
 
 love.draw = function ()
   love.graphics.clear()
+
+
+  -- for i, t in ipairs(tileSet) do
+  --   print(i,t)
+  -- end
+
   for _, tile in pairs(tiles) do
     love.graphics.setColor(1,1,1)
     tile:drawIso()
