@@ -1,6 +1,7 @@
 -- Libraries
 local ffi = require("ffi")
 local lib = require("lib")
+local imageSet = require("tileSet")
 local save = require("save")
 
 ffi.cdef([[
@@ -21,6 +22,8 @@ local function imageOffset(image, height)
 end
 
 local IsoMap = {}
+local layer = 1
+local clickedImage
 
 function IsoMap:newMap(width, height, offsetX, offsetY, mapSize)
 	local screenX, screenY = love.graphics.getPixelDimensions()
@@ -81,7 +84,7 @@ function IsoMap:drawMap()
 		local rx, ry = t.x + t.width / 2, t.y
 
 		if t.active then
-			t.image = "tile044.png"
+			t.image = clickedImage
 			local tileImage = love.graphics.newImage(t.image)
 			love.graphics.draw(
 				tileImage,
@@ -107,6 +110,54 @@ function IsoMap:saveFile(mapName)
 	local file = ffi.C.fopen(love.filesystem.getWorkingDirectory() .. "/" .. mapName .. ".lua", "w")
 	ffi.C.fprintf(file, save(self.tiles))
 	ffi.C.fclose(file)
+end
+
+function IsoMap.drawLayers(width, height)
+	local imgX, imgY = 20, 15
+	local boxW, boxH = width * 6 + 10, height * 2 + 10
+	love.graphics.setColor(1, 1, 1)
+	love.graphics.rectangle("line", 10, 10, boxW, boxH)
+	for _, set in pairs(imageSet[layer]) do
+		local image = love.graphics.newImage(set)
+		local imgW = image:getWidth()
+		local imgH = image:getHeight()
+
+		if imgX < boxW and imgY < boxH then
+			love.graphics.draw(image, imgX, imgY, nil, 0.8, 0.8)
+			imgX = imgX + image:getWidth()
+		end
+
+		if imgX >= boxW then
+			imgY = imgY + image:getHeight() + 5
+			imgX = 20
+		end
+	end
+end
+
+function IsoMap.switchLayer(key)
+	if key == ">" then
+		layer = layer < #imageSet and layer + 1 or 1
+	elseif key == "<" then
+		layer = layer > 1 and layer - 1 or 1
+	end
+end
+
+function IsoMap.savedSet(mx, my)
+	local x, y = 20, 15
+	local boxW, boxH = 32 * 6 + 10, 32 * 2 + 10
+	if mx < boxW and my < boxH then
+		for _, img in pairs(imageSet[layer]) do
+			if mx >= x and mx <= x + 32 and my >= y and my <= y + 32 then
+				clickedImage = img
+			end
+
+			x = x + 32
+			if x >= boxW then
+				y = y + 32 + 5
+				x = 20
+			end
+		end
+	end
 end
 
 return IsoMap
