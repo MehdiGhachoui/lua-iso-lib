@@ -133,20 +133,17 @@ function IsoMap:saveFile(mapName)
 end
 
 function IsoMap:drawLayers(col, row)
+	local mouseX, mouseY = love.mouse.getPosition()
 	local imgX, imgY = 15, 15
 	local boxW, boxH = self.tileWidth * col + 10, self.tileHeight * row + 15
+
 	love.graphics.rectangle("line", 10, 10, boxW, boxH)
+
 	for _, set in pairs(imageSet[layer]) do
 		local image = love.graphics.newImage(set)
-
 		if imgX < boxW and imgY < boxH then
 			love.graphics.setColor(1, 1, 1)
 			love.graphics.draw(image, imgX, imgY, nil, 0.8, 0.8)
-			print(imgLayrX, imgLayrY)
-			if imgLayrX == x and imgLayrY == y then
-				love.graphics.setColor(0, 0, 1, 0.4)
-				love.graphics.rectangle("fill", imgX, imgY, self.tileWidth, self.tileHeight)
-			end
 			imgX = imgX + image:getWidth()
 		end
 
@@ -154,6 +151,11 @@ function IsoMap:drawLayers(col, row)
 			imgY = imgY + image:getHeight() + 5
 			imgX = 15
 		end
+	end
+
+	if clickedImage then
+		local image = love.graphics.newImage(clickedImage)
+		love.graphics.draw(image, mouseX + 5, mouseY, nil, 0.7, 0.7)
 	end
 end
 
@@ -172,8 +174,6 @@ function IsoMap:saveSet(mx, my, col, row)
 		for _, img in pairs(imageSet[layer]) do
 			if mx >= x and mx <= x + self.tileWidth and my >= y and my <= y + self.tileHeight then
 				clickedImage = img
-				imgLayrX = x
-				imgLayrY = x, y
 			end
 
 			x = x + self.tileWidth

@@ -1,5 +1,4 @@
 -- todo :
--- show selection image near mouse with low opacity
 -- move camera with mouse
 -- zome in/out ?
 
