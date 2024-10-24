@@ -40,26 +40,25 @@ local function pointToPoly(tile)
 	}
 end
 
-local IsoMap = {}
+local screenX, screenY = love.graphics.getPixelDimensions()
+local clickedImage = nil
 local layer = 1
-local clickedImage
+local IsoMap = {}
 
-function IsoMap:newMap(width, height, offsetX, offsetY, mapSize)
-	local screenX, screenY = love.graphics.getPixelDimensions()
-
+function IsoMap:newMap(width, height, startingX, startingY, mapSize)
 	self.tiles = {}
 	self.tileWidth = width
 	self.tileHeight = height
 
 	height = height / 2
-	offsetX = offsetX or screenX / 2
-	offsetY = offsetY or (screenY / 2 - ((mapSize / 2) * height))
+	startingX = startingY or screenX / 2
+	startingY = startingY or (screenY / 2 - ((mapSize / 2) * height))
 
 	for y = 1, mapSize do
 		for x = 1, mapSize do
 			table.insert(self.tiles, {
-				x = (x - y) * (width / 2) + offsetX,
-				y = (x + y) * (height / 2) + offsetY,
+				x = (x - y) * (width / 2) + startingX,
+				y = (x + y) * (height / 2) + startingY,
 				width = width,
 				height = height,
 				active = false,

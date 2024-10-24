@@ -1,9 +1,10 @@
 -- todo :
--- move camera with mouse
+-- move camera with double click
 -- zome in/out ?
 
 local iso = require("isoMap")
-local mapSize = 20
+local lib = require("lib")
+local mapSize = 30
 local tileWidth, tileHeight = 32, 32
 
 love.load = function()
@@ -13,6 +14,7 @@ end
 love.mousepressed = function(mx, my, key)
 	iso:checkClick(mx, my, key)
 	iso:saveSet(mx, my, 6, 2)
+	lib.doubleClick(key)
 end
 
 love.keypressed = function(key)
