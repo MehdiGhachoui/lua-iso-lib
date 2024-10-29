@@ -40,37 +40,44 @@ local function pointToPoly(tile)
 	}
 end
 
-local screenX, screenY = love.graphics.getPixelDimensions()
 local clickedImage = nil
 local layer = 1
 local IsoMap = {}
 
-function IsoMap:newMap(width, height, startingX, startingY, mapSize)
-	self.tiles = {}
-	self.tileWidth = width
-	self.tileHeight = height
+function IsoMap:loadSavedMap()
+	if love.filesystem.getInfo(self.mapName) then
+		local contents = love.filesystem.load(self.mapName)
+		return contents()
+	end
+
+	return {}
+end
+
+function IsoMap:newMap(mapName, width, height, startingX, startingY, mapSize)
+	local screenX, screenY = love.graphics.getPixelDimensions()
 
 	height = height / 2
 	startingX = startingY or screenX / 2
 	startingY = startingY or (screenY / 2 - ((mapSize / 2) * height))
 
-	for y = 1, mapSize do
-		for x = 1, mapSize do
-			table.insert(self.tiles, {
-				x = (x - y) * (width / 2) + startingX,
-				y = (x + y) * (height / 2) + startingY,
-				width = width,
-				height = height,
-				active = false,
-			})
-		end
-	end
-end
+	self.tileWidth = width
+	self.tileHeight = height * 2
+	self.mapName = mapName .. ".lua"
 
-function IsoMap:loadMap(mapName)
-	if love.filesystem.getInfo(mapName .. ".lua") then
-		local contents = love.filesystem.load(mapName .. ".lua")
-		self.tiles = contents()
+	self.tiles = self:loadSavedMap()
+
+	if #self.tiles == 0 then
+		for y = 1, mapSize do
+			for x = 1, mapSize do
+				table.insert(self.tiles, {
+					x = (x - y) * (width / 2) + startingX,
+					y = (x + y) * (height / 2) + startingY,
+					width = width,
+					height = height,
+					active = false,
+				})
+			end
+		end
 	end
 end
 
@@ -87,6 +94,7 @@ function IsoMap:checkClick(mx, my, key)
 		if isPointInPoly then
 			if key == 1 then
 				tile.active = true
+				tile.image = clickedImage
 			else
 				tile.image = nil
 				tile.active = false
@@ -99,14 +107,8 @@ function IsoMap:drawMap()
 	for _, t in pairs(self.tiles) do
 		local poly = pointToPoly(t)
 
-		if clickedImage ~= nil then
-			t.image = clickedImage
-		else
-			t.active = false
-		end
-
 		if t.active and t.image then
-			local tileImage = love.graphics.newImage(clickedImage)
+			local tileImage = love.graphics.newImage(t.image)
 			love.graphics.draw(
 				tileImage,
 				t.x,
@@ -125,10 +127,14 @@ function IsoMap:drawMap()
 	end
 end
 
-function IsoMap:saveFile(mapName)
-	local file = ffi.C.fopen(love.filesystem.getWorkingDirectory() .. "/" .. mapName .. ".lua", "w")
-	ffi.C.fprintf(file, save(self.tiles))
-	ffi.C.fclose(file)
+function IsoMap:saveFile(key)
+	if key == "escape" then
+		local file = ffi.C.fopen(love.filesystem.getWorkingDirectory() .. "/" .. self.mapName, "w")
+		ffi.C.fprintf(file, save(self.tiles))
+		ffi.C.fclose(file)
+
+		love.event.quit("restart")
+	end
 end
 
 function IsoMap:drawLayers(col, row)
