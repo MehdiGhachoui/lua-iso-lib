@@ -26,8 +26,3 @@ love.draw = function()
 	iso:drawLayers(6, 2)
 	iso:drawMap()
 end
-
-love.resize = function(w, h)
-	iso:newMap("level_A", tileWidth, tileHeight, nil, nil, mapSize)
-	-- love.event.quit("restart")
-end

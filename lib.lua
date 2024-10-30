@@ -1,17 +1,3 @@
-local lastClick = 0
-local interval = 0.2
-
-local function doubleClick(mx, my, key)
-	if key == 1 then
-		local time = love.timer.getTime()
-
-		if time <= lastClick + interval then
-		else
-			lastClick = time
-		end
-	end
-end
-
 -- franklin implemenation of ray method to check if
 -- point is within polygon with vertices
 --
@@ -32,6 +18,20 @@ local function point_in_polygon(vertices, point)
 	end
 
 	return contains
+end
+
+local lastClick = 0
+local interval = 0.2
+
+local function doubleClick(mx, my, key)
+	if key == 1 then
+		local time = love.timer.getTime()
+
+		if time <= lastClick + interval then
+		else
+			lastClick = time
+		end
+	end
 end
 
 return {

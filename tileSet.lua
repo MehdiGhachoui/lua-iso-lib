@@ -1,5 +1,5 @@
 local layer_1 = {
-	"tile044.png",
+	"tileImage.png",
 	"tile044.png",
 	"tile044.png",
 	"tile044.png",
