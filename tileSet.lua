@@ -1,34 +1,5 @@
-local layer_1 = {
-	"tileImage.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-	"tile044.png",
-}
+local layer_1 = {}
+
 return {
 	layer_1,
 }
