@@ -1,8 +1,7 @@
 -- Libraries
-local ffi = require("ffi")
-local lib = require("lib")
-local imageSet = require("tileSet")
-local save = require("save")
+local ffi = require "ffi"
+local lib = require "isometric.lib"
+local save = require "isometric.save"
 
 ffi.cdef([[
     typedef struct FILE FILE;
@@ -11,6 +10,10 @@ ffi.cdef([[
     int fclose(FILE* stream);
 ]])
 
+--- Calculculate the offset of an Image
+--- @param image love.Image
+--- @param height number
+--- @return number
 local function imageOffset(image, height)
 	local Offset = image:getHeight() / height
 
@@ -21,7 +24,7 @@ local function imageOffset(image, height)
 	return image:getHeight() / Offset
 end
 
--- turn tile to a diamond shape using x,y
+--- Changes the tiles to a "polygon" shape
 local function pointToPoly(tile)
 	local tx, ty = tile.x, tile.y - tile.height / 2
 	local bx, by = tile.x, tile.y + tile.height / 2
@@ -44,6 +47,8 @@ local clickedImage = nil
 local layer = 1
 local IsoMap = {}
 
+--- Checks and existing map if any
+--- @return table
 function IsoMap:loadSavedMap()
 	if love.filesystem.getInfo(self.mapName) then
 		local contents = love.filesystem.load(self.mapName)
@@ -53,13 +58,22 @@ function IsoMap:loadSavedMap()
 	return {}
 end
 
-function IsoMap:newMap(mapName, width, height, startingX, startingY, mapSize)
+--- Create a new Isometric
+--- @param mapName string
+--- @param tileSet table
+--- @param width number
+--- @param height number
+--- @param startingX number
+--- @param startingY number
+--- @param mapSize number
+function IsoMap:newMap(mapName,tileSet, width, height, startingX, startingY, mapSize)
 	local screenX, screenY = love.graphics.getPixelDimensions()
 
 	height = height / 2
 	startingX = startingY or screenX / 2
 	startingY = startingY or (screenY / 2 - ((mapSize / 2) * height))
 
+	self.tileSet = tileSet
 	self.tileWidth = width
 	self.tileHeight = height * 2
 	self.mapName = mapName .. ".lua"
@@ -81,6 +95,11 @@ function IsoMap:newMap(mapName, width, height, startingX, startingY, mapSize)
 	end
 end
 
+--- Replace tile with saved tile set with right click;
+--- Undo with left click;
+---	@param mx number
+---	@param my number
+---	@param key number
 function IsoMap:checkClick(mx, my, key)
 	for _, tile in pairs(self.tiles) do
 		local poly = pointToPoly(tile)
@@ -103,6 +122,7 @@ function IsoMap:checkClick(mx, my, key)
 	end
 end
 
+--- Draw tiles
 function IsoMap:drawMap()
 	for _, t in pairs(self.tiles) do
 		local poly = pointToPoly(t)
@@ -127,6 +147,8 @@ function IsoMap:drawMap()
 	end
 end
 
+--- Save the map
+--- @param key string
 function IsoMap:saveFile(key)
 	if key == "escape" then
 		local file = ffi.C.fopen(love.filesystem.getWorkingDirectory() .. "/" .. self.mapName, "w")
@@ -137,6 +159,10 @@ function IsoMap:saveFile(key)
 	end
 end
 
+
+--- Draw layers of the tileset on the top left of the screen
+--- @param col number -- Number of columns of the layer
+--- @param row number -- Number of rows of the layer
 function IsoMap:drawLayers(col, row)
 	local mouseX, mouseY = love.mouse.getPosition()
 	local imgX, imgY = 15, 15
@@ -144,7 +170,7 @@ function IsoMap:drawLayers(col, row)
 
 	love.graphics.rectangle("line", 10, 10, boxW, boxH)
 
-	for _, set in pairs(imageSet[layer]) do
+	for _, set in pairs(self.tileSet[layer]) do
 		local image = love.graphics.newImage(set)
 		if imgX < boxW and imgY < boxH then
 			love.graphics.setColor(1, 1, 1)
@@ -164,9 +190,11 @@ function IsoMap:drawLayers(col, row)
 	end
 end
 
-function IsoMap.switchLayer(key)
+--- Switch between layers of the tileset
+--- @param key string
+function IsoMap:switchLayer(key)
 	if key == ">" then
-		layer = layer < #imageSet and layer + 1 or 1
+		layer = layer < #self.tileSet and layer + 1 or 1
 	elseif key == "<" then
 		layer = layer > 1 and layer - 1 or 1
 	end
@@ -176,7 +204,7 @@ function IsoMap:saveSet(mx, my, col, row)
 	local x, y = 15, 15
 	local boxW, boxH = self.tileWidth * col + 10, self.tileHeight * row + 10
 	if mx < boxW and my < boxH then
-		for _, img in pairs(imageSet[layer]) do
+		for _, img in pairs(self.tileSet[layer]) do
 			if mx >= x and mx <= x + self.tileWidth and my >= y and my <= y + self.tileHeight then
 				clickedImage = img
 			end

@@ -3,12 +3,13 @@
 -- move camera with double click?
 -- zome in/out?
 
-local iso = require("isoMap")
+local iso = require "isometric.isoMap"
+local tiles = require "tileSet"
 local mapSize = 30
 local tileWidth, tileHeight = 32, 32
 
 love.load = function()
-	iso:newMap("level_A", tileWidth, tileHeight, nil, nil, mapSize)
+	iso:newMap("level_A",tiles, tileWidth, tileHeight, nil, nil, mapSize)
 end
 
 love.mousepressed = function(mx, my, key)
@@ -18,7 +19,7 @@ end
 
 love.keypressed = function(key)
 	iso:saveFile(key)
-	iso.switchLayer(key)
+	iso:switchLayer(key)
 end
 
 love.draw = function()
