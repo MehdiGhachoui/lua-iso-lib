@@ -200,6 +200,7 @@ function IsoMap:switchLayer(key)
 	end
 end
 
+--- Save the clicked tileSet
 function IsoMap:saveSet(mx, my, col, row)
 	local x, y = 15, 15
 	local boxW, boxH = self.tileWidth * col + 10, self.tileHeight * row + 10
@@ -209,6 +210,7 @@ function IsoMap:saveSet(mx, my, col, row)
 				clickedImage = img
 			end
 
+			--- Why ?
 			x = x + self.tileWidth
 			if x >= boxW then
 				y = y + self.tileHeight + 5
