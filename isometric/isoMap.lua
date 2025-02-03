@@ -70,8 +70,8 @@ function IsoMap:newMap(mapName,tileSet, width, height, startingX, startingY, map
 	local screenX, screenY = love.graphics.getPixelDimensions()
 
 	height = height / 2
-	startingX = startingY or screenX / 2
-	startingY = startingY or (screenY / 2 - ((mapSize / 2) * height))
+	startingX = startingX + screenX / 2
+	startingY = startingY + (screenY / 2 - ((mapSize / 2) * height))
 
 	self.tileSet = tileSet
 	self.tileWidth = width
